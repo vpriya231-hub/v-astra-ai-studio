@@ -4,56 +4,63 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  body { font-family: sans-serif; text-align: center; background: #ffffff; margin: 0; padding: 10px; }
+  body { font-family: sans-serif; text-align: center; background: #fff; padding: 10px; margin: 0; }
   .box { max-width: 500px; margin: auto; padding: 20px; border-radius: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.1); }
-  h2 { color: #007bff; }
-  input { width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #f0f0f0; border-radius: 12px; box-sizing: border-box; }
-  button { width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; }
-  .loader { display: none; border: 5px solid #f3f3f3; border-top: 5px solid #007bff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+  input { width: 100%; padding: 15px; margin-bottom: 10px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; }
+  button { width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
+  .loader { display: none; border: 5px solid #f3f3f3; border-top: 5px solid #007bff; border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; margin: 20px auto; }
   @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  #resImg { display: none; width: 100%; border-radius: 15px; margin-top: 20px; }
-  #saveBtn { display: none; background: #28a745; margin-top: 15px; }
+  #resImg { width: 100%; border-radius: 15px; margin-top: 15px; display: none; }
 </style>
 </head>
 <body>
 
 <div class="box">
-  <h2>V-Astra AI Studio</h2>
-  <input type="text" id="pInput" placeholder="Enter image description...">
+  <h2 style="color:#007bff">V-Astra AI Studio</h2>
+  <input type="text" id="pInput" placeholder="Describe your image...">
   <button onclick="gen()">Create Image</button>
   <div class="loader" id="ldr"></div>
-  <img id="resImg" crossorigin="anonymous">
-  <button id="saveBtn" onclick="openToSave()">View Full Image to Save</button>
+  
+  <!-- ഈ ഇമേജ് ടാഗിൽ വാട്ടർമാർക്ക് ഉള്ള ഫൈനൽ ഇമേജ് വരും -->
+  <img id="resImg" src="">
+  <p id="msg" style="display:none; color:#888; font-size:14px;">Long press to save as Image</p>
 </div>
 
 <script>
-var currentBase64 = "";
-
 function gen() {
   var p = document.getElementById('pInput').value.trim();
-  if(!p) return alert("Enter description!");
-  var l = document.getElementById('ldr'), i = document.getElementById('resImg'), s = document.getElementById('saveBtn');
-  l.style.display = "block"; i.style.display = "none"; s.style.display = "none";
+  if(!p) return alert("Enter description");
 
-  var url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(p) + "?seed=" + Math.random() + "&width=1024&height=1024&nologo=true";
-  i.src = url;
+  var ldr = document.getElementById('ldr'), imgTag = document.getElementById('resImg'), msg = document.getElementById('msg');
+  ldr.style.display = "block"; imgTag.style.display = "none"; msg.style.display = "none";
 
-  i.onload = function() {
-    l.style.display = "none"; i.style.display = "block"; s.style.display = "block";
-    // ഇമേജിനെ ഒരു ക്യാൻവാസിലേക്ക് മാറ്റി Base64 ലിങ്ക് ഉണ്ടാക്കുന്നു
+  var seed = Math.floor(Math.random() * 1000000);
+  var tempImg = new Image();
+  tempImg.crossOrigin = "anonymous";
+  tempImg.src = "https://image.pollinations.ai/prompt/" + encodeURIComponent(p) + "?seed=" + seed + "&width=1024&height=1024&nologo=true";
+
+  tempImg.onload = function() {
     var canvas = document.createElement('canvas');
-    canvas.width = i.naturalWidth; canvas.height = i.naturalHeight;
+    canvas.width = 1024; canvas.height = 1024;
     var ctx = canvas.getContext('2d');
-    ctx.drawImage(i, 0, 0);
-    currentBase64 = canvas.toDataURL("image/png");
-  };
-}
+    
+    // ഇമേജ് വരയ്ക്കുന്നു
+    ctx.drawImage(tempImg, 0, 0);
 
-function openToSave() {
-  // പുതിയ വിൻഡോയിൽ ഇമേജ് മാത്രം കാണിക്കുന്നു, അപ്പോൾ ലോംഗ് പ്രസ്സ് ചെയ്താൽ .png ആയി ലഭിക്കും
-  var win = window.open();
-  win.document.write('<img src="' + currentBase64 + '" style="width:100%;">');
-  win.document.write('<h2 style="text-align:center;font-family:sans-serif;">Long Press Image to Save</h2>');
+    // വാട്ടർമാർക്ക് ചേർക്കുന്നു
+    ctx.font = "bold 30px Arial";
+    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+    ctx.textAlign = "right";
+    ctx.fillText("V-Astra AI", canvas.width - 20, canvas.height - 30);
+
+    // ക്യാൻവാസിനെ നേരിട്ട് ഇമേജ് ആക്കി മാറ്റുന്നു
+    // ഇത് ചെയ്യുന്നതിലൂടെ ആപ്പിന് ഇതിനെ ഒരു ഇമേജ് ആയി മാത്രമേ കാണാൻ കഴിയൂ
+    imgTag.src = canvas.toDataURL("image/png");
+    
+    ldr.style.display = "none";
+    imgTag.style.display = "block";
+    msg.style.display = "block";
+  };
 }
 </script>
 </body>
