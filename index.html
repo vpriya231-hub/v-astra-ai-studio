@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V-Astra AI Studio</title>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; text-align: center; background-color: #ffffff; padding: 10px; margin: 0; }
+  .box { max-width: 450px; margin: 20px auto; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); background: white; }
+  h2 { color: #007bff; margin-bottom: 20px; }
+  input { width: 90%; padding: 15px; margin: 10px 0; border: 2px solid #f0f0f0; border-radius: 12px; outline: none; transition: 0.3s; }
+  input:focus { border-color: #007bff; }
+  button { width: 95%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; }
+  #dlBtn { display: none; background: #28a745; margin-top: 15px; }
+  .loader { display: none; border: 5px solid #f3f3f3; border-top: 5px solid #007bff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  #resImg { display: none; width: 100%; margin-top: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+  canvas { display: none; }
+</style>
+</head>
+<body>
+
+<div class="box">
+  <h2>V-Astra AI Studio</h2>
+  <input type="text" id="pInput" placeholder="Describe your image in English...">
+  <button onclick="gen()">Create Image</button>
+  <div class="loader" id="ldr"></div>
+  <img id="resImg" src="" crossorigin="anonymous">
+  <button id="dlBtn" onclick="downloadImg()">Download Image</button>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+function gen() {
+  var p = document.getElementById('pInput').value.trim();
+  if(!p) { alert("Please type something!"); return; }
+  
+  var l = document.getElementById('ldr');
+  var i = document.getElementById('resImg');
+  var d = document.getElementById('dlBtn');
+  
+  l.style.display = "block"; i.style.display = "none"; d.style.display = "none";
+  
+  var seed = Math.floor(Math.random() * 999999);
+  // Using direct image URL for better compatibility
+  var url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(p) + "?seed=" + seed + "&width=1024&height=1024&nologo=true";
+  
+  i.src = url;
+  i.onload = function() { 
+    l.style.display = "none"; 
+    i.style.display = "block"; 
+    d.style.display = "block"; 
+  };
+}
+
+function downloadImg() {
+  var img = document.getElementById('resImg');
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
+
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  ctx.drawImage(img, 0, 0);
+
+  // Subtle & Small Watermark
+  var text = "V-Astra AI";
+  ctx.font = "24px Arial"; // Smaller size
+  ctx.fillStyle = "rgba(255, 255, 255, 0.4)"; // Low transparency (0.4)
+  ctx.textAlign = "right";
+  
+  // Placed at the bottom-right corner
+  ctx.fillText(text, canvas.width - 20, canvas.height - 20);
+
+  var link = document.createElement('a');
+  link.download = 'V-Astra_AI_Image.png';
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+}
+</script>
+
+</body>
+</html>
