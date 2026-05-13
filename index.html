@@ -4,75 +4,116 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  body { font-family: sans-serif; text-align: center; background: #fff; padding: 10px; margin: 0; }
-  .box { max-width: 450px; margin: 20px auto; padding: 20px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
-  input { width: 90%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-  button { width: 95%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
-  #dlBtn { background: #28a745; display: none; }
-  .loader { display: none; border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
+  body { 
+    font-family: sans-serif; 
+    text-align: center; 
+    background: #ffffff; 
+    margin: 0; 
+    padding: 10px;
+  }
+  .box { 
+    max-width: 500px; 
+    margin: auto; 
+    padding: 20px; 
+    border-radius: 20px; 
+    box-shadow: 0 5px 25px rgba(0,0,0,0.1); 
+    background: #fff;
+  }
+  h2 { color: #007bff; margin-bottom: 20px; }
+  input { 
+    width: 100%; 
+    padding: 15px; 
+    margin-bottom: 15px; 
+    border: 2px solid #f0f0f0; 
+    border-radius: 12px; 
+    box-sizing: border-box; 
+    font-size: 16px;
+  }
+  button { 
+    width: 100%; 
+    padding: 15px; 
+    background: #007bff; 
+    color: white; 
+    border: none; 
+    border-radius: 12px; 
+    cursor: pointer; 
+    font-weight: bold; 
+    font-size: 16px;
+  }
+  .loader { 
+    display: none; 
+    border: 5px solid #f3f3f3; 
+    border-top: 5px solid #007bff; 
+    border-radius: 50%; 
+    width: 40px; 
+    height: 40px; 
+    animation: spin 1s linear infinite; 
+    margin: 20px auto; 
+  }
   @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  #resImg { display: none; width: 100%; border-radius: 10px; margin-top: 15px; }
-  canvas { display: none; }
+  
+  /* ഇമേജ് സ്ക്രീനിന്റെ ഫുൾ വലിപ്പത്തിൽ വരാൻ */
+  #resImg { 
+    display: none; 
+    width: 100%; 
+    height: auto; 
+    border-radius: 15px; 
+    margin-top: 20px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  }
+  
+  .instruction { 
+    font-size: 14px; 
+    color: #888; 
+    margin-top: 15px; 
+    display: none;
+  }
 </style>
 </head>
 <body>
 
 <div class="box">
-  <h2 style="color:#007bff">V-Astra AI Studio</h2>
-  <input type="text" id="pInput" placeholder="Describe your image...">
+  <h2>V-Astra AI Studio</h2>
+  <input type="text" id="pInput" placeholder="Enter image description in English...">
   <button onclick="gen()">Create Image</button>
+  
   <div class="loader" id="ldr"></div>
   
-  <!-- Actual Image Tag for Long Press -->
-  <img id="resImg" src="" crossorigin="anonymous">
+  <!-- Image display -->
+  <img id="resImg" src="">
   
-  <!-- Download Button for Watermark -->
-  <button id="dlBtn" onclick="downloadImg()">Download with Watermark</button>
+  <p class="instruction" id="ins">Long press the image to Save to Gallery</p>
 </div>
-
-<canvas id="canvas"></canvas>
 
 <script>
 function gen() {
   var p = document.getElementById('pInput').value.trim();
-  if(!p) return alert("Please enter description");
+  if(!p) return alert("Please enter a description!");
 
   var l = document.getElementById('ldr');
   var i = document.getElementById('resImg');
-  var d = document.getElementById('dlBtn');
+  var n = document.getElementById('ins');
 
-  l.style.display = "block"; i.style.display = "none"; d.style.display = "none";
+  l.style.display = "block"; 
+  i.style.display = "none"; 
+  n.style.display = "none";
 
   var seed = Math.floor(Math.random() * 1000000);
+  // Pollinations നേരിട്ടുള്ള ഇമേജ് ലിങ്ക്
   i.src = "https://image.pollinations.ai/prompt/" + encodeURIComponent(p) + "?seed=" + seed + "&width=1024&height=1024&nologo=true";
 
   i.onload = function() {
     l.style.display = "none";
     i.style.display = "block";
-    d.style.display = "block";
+    n.style.display = "block";
+  };
+  
+  i.onerror = function() {
+    l.style.display = "none";
+    alert("Error generating image. Try again.");
   };
 }
-
-function downloadImg() {
-  var img = document.getElementById('resImg');
-  var canvas = document.getElementById('canvas');
-  var ctx = canvas.getContext('2d');
-
-  canvas.width = img.naturalWidth;
-  canvas.height = img.naturalHeight;
-  ctx.drawImage(img, 0, 0);
-
-  ctx.font = "bold 30px Arial";
-  ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-  ctx.textAlign = "right";
-  ctx.fillText("V-Astra AI", canvas.width - 20, canvas.height - 20);
-
-  var link = document.createElement('a');
-  link.download = 'VAstra_Image.png';
-  link.href = canvas.toDataURL("image/png");
-  link.click();
-}
 </script>
+
 </body>
 </html>
-
