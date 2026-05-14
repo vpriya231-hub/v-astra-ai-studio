@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>V-Astra AI Studio</title>
 <style>
   body { font-family: sans-serif; text-align: center; background: #fff; padding: 10px; margin: 0; }
-  .box { max-width: 500px; margin: auto; padding: 20px; border-radius: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.1); }
-  input { width: 100%; padding: 15px; margin-bottom: 10px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; }
+  .box { max-width: 450px; margin: auto; padding: 20px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+  input { width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; }
   button { width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
-  .loader { display: none; border: 5px solid #f3f3f3; border-top: 5px solid #007bff; border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; margin: 20px auto; }
+  #dlBtn { background: #28a745; display: none; }
+  .loader { display: none; border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; margin: 20px auto; }
   @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  #resImg { width: 100%; border-radius: 15px; margin-top: 15px; display: none; cursor: pointer; }
+  #resImg { width: 100%; border-radius: 15px; margin-top: 15px; display: none; }
 </style>
 </head>
 <body>
@@ -21,37 +21,52 @@
   <input type="text" id="pInput" placeholder="Describe your image...">
   <button onclick="gen()">Create Image</button>
   <div class="loader" id="ldr"></div>
-  
-  <img id="resImg" src="" onclick="openDirect()">
-  <p id="msg" style="display:none; color:#d9534f; font-weight:bold; margin-top:10px;">
-    Click the image, then Long Press to Save
-  </p>
+  <img id="resImg" src="" crossorigin="anonymous">
+  <button id="dlBtn" onclick="downloadImg()">Download Image</button>
 </div>
+
+<canvas id="canvas" style="display:none;"></canvas>
 
 <script>
 function gen() {
   var p = document.getElementById('pInput').value.trim();
-  if(!p) return alert("Enter description");
+  if(!p) return alert("Please enter description");
 
-  var ldr = document.getElementById('ldr'), imgTag = document.getElementById('resImg'), msg = document.getElementById('msg');
-  ldr.style.display = "block"; imgTag.style.display = "none"; msg.style.display = "none";
+  var l = document.getElementById('ldr'), i = document.getElementById('resImg'), d = document.getElementById('dlBtn');
+  l.style.display = "block"; i.style.display = "none"; d.style.display = "none";
 
-  var seed = Math.floor(Math.random() * 1000000);
-  // Pollinations നേരിട്ടുള്ള ലിങ്ക്
-  var finalUrl = "https://image.pollinations.ai/prompt/" + encodeURIComponent(p) + "?seed=" + seed + "&width=1024&height=1024&nologo=true";
-
-  imgTag.src = finalUrl;
-  imgTag.onload = function() {
-    ldr.style.display = "none";
-    imgTag.style.display = "block";
-    msg.style.display = "block";
+  var url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(p) + "?seed=" + Math.random() + "&width=1024&height=1024&nologo=true";
+  
+  i.src = url;
+  i.onload = function() { 
+    l.style.display = "none"; i.style.display = "block"; d.style.display = "block";
   };
 }
 
-function openDirect() {
-  // ഇമേജിന്റെ URL നേരിട്ട് ബ്രൗസറിൽ തുറക്കുന്നു
+function downloadImg() {
   var img = document.getElementById('resImg');
-  window.location.href = img.src;
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
+  
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  ctx.drawImage(img, 0, 0);
+
+  // വാട്ടർമാർക്ക്
+  ctx.font = "bold 30px Arial";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+  ctx.textAlign = "right";
+  ctx.fillText("V-Astra AI", canvas.width - 20, canvas.height - 30);
+
+  // blob ഉപയോഗിച്ച് ഡൗൺലോഡ് ചെയ്യുന്നത് ഫയൽ എക്സ്റ്റൻഷൻ ശരിയാക്കാൻ സഹായിക്കും
+  canvas.toBlob(function(blob) {
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = 'V-Astra_AI.png';
+    link.click();
+    URL.revokeObjectURL(url);
+  }, 'image/png');
 }
 </script>
 </body>
