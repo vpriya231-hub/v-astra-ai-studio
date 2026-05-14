@@ -8,59 +8,67 @@
   .box { max-width: 500px; margin: auto; padding: 20px; border-radius: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.1); }
   input { width: 100%; padding: 15px; margin-bottom: 10px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; }
   button { width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
+  #resImg { width: 100%; border-radius: 15px; margin-top: 15px; display: none; }
   .loader { display: none; border: 5px solid #f3f3f3; border-top: 5px solid #007bff; border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; margin: 20px auto; }
   @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  #resImg { width: 100%; border-radius: 15px; margin-top: 15px; display: none; }
 </style>
 </head>
 <body>
 
 <div class="box">
   <h2 style="color:#007bff">V-Astra AI Studio</h2>
-  <input type="text" id="pInput" placeholder="Describe your image...">
+  <input type="text" id="pInput" placeholder="Enter description...">
   <button onclick="gen()">Create Image</button>
   <div class="loader" id="ldr"></div>
+  <img id="resImg" src="" crossorigin="anonymous">
   
-  <!-- ഈ ഇമേജ് ടാഗിൽ വാട്ടർമാർക്ക് ഉള്ള ഫൈനൽ ഇമേജ് വരും -->
-  <img id="resImg" src="">
-  <p id="msg" style="display:none; color:#888; font-size:14px;">Long press to save as Image</p>
+  <!-- ഈ ബട്ടൺ അമർത്തുമ്പോൾ ആപ്പ് പുറത്തേക്ക് പോകാതെ ഡൗൺലോഡ് ട്രിഗർ ചെയ്യാൻ ശ്രമിക്കും -->
+  <button id="dlBtn" style="display:none; background:#28a745;" onclick="saveImage()">Save Image with Watermark</button>
 </div>
+
+<canvas id="canvas" style="display:none;"></canvas>
 
 <script>
 function gen() {
   var p = document.getElementById('pInput').value.trim();
   if(!p) return alert("Enter description");
-
-  var ldr = document.getElementById('ldr'), imgTag = document.getElementById('resImg'), msg = document.getElementById('msg');
-  ldr.style.display = "block"; imgTag.style.display = "none"; msg.style.display = "none";
+  var l = document.getElementById('ldr'), i = document.getElementById('resImg'), d = document.getElementById('dlBtn');
+  l.style.display = "block"; i.style.display = "none"; d.style.display = "none";
 
   var seed = Math.floor(Math.random() * 1000000);
-  var tempImg = new Image();
-  tempImg.crossOrigin = "anonymous";
-  tempImg.src = "https://image.pollinations.ai/prompt/" + encodeURIComponent(p) + "?seed=" + seed + "&width=1024&height=1024&nologo=true";
-
-  tempImg.onload = function() {
-    var canvas = document.createElement('canvas');
-    canvas.width = 1024; canvas.height = 1024;
-    var ctx = canvas.getContext('2d');
-    
-    // ഇമേജ് വരയ്ക്കുന്നു
-    ctx.drawImage(tempImg, 0, 0);
-
-    // വാട്ടർമാർക്ക് ചേർക്കുന്നു
-    ctx.font = "bold 30px Arial";
-    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-    ctx.textAlign = "right";
-    ctx.fillText("V-Astra AI", canvas.width - 20, canvas.height - 30);
-
-    // ക്യാൻവാസിനെ നേരിട്ട് ഇമേജ് ആക്കി മാറ്റുന്നു
-    // ഇത് ചെയ്യുന്നതിലൂടെ ആപ്പിന് ഇതിനെ ഒരു ഇമേജ് ആയി മാത്രമേ കാണാൻ കഴിയൂ
-    imgTag.src = canvas.toDataURL("image/png");
-    
-    ldr.style.display = "none";
-    imgTag.style.display = "block";
-    msg.style.display = "block";
+  i.src = "https://image.pollinations.ai/prompt/" + encodeURIComponent(p) + "?seed=" + seed + "&width=1024&height=1024&nologo=true";
+  
+  i.onload = function() { 
+    l.style.display = "none"; i.style.display = "block"; d.style.display = "block";
   };
+}
+
+function saveImage() {
+  var img = document.getElementById('resImg');
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
+  
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  ctx.drawImage(img, 0, 0);
+
+  // വാട്ടർമാർക്ക്
+  ctx.font = "bold 30px Arial";
+  ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+  ctx.textAlign = "right";
+  ctx.fillText("V-Astra AI", canvas.width - 20, canvas.height - 30);
+
+  // Blob ഉപയോഗിച്ചുള്ള ഡൗൺലോഡ് - ഇത് .bin പ്രശ്നം കുറയ്ക്കാൻ സഹായിക്കും
+  canvas.toBlob(function(blob) {
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = 'V-Astra_AI_' + Date.now() + '.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, 'image/png');
 }
 </script>
 </body>
