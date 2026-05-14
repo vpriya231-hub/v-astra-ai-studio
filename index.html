@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V-Astra AI Studio</title>
 <style>
   body { font-family: sans-serif; text-align: center; background: #fff; padding: 10px; margin: 0; }
   .box { max-width: 500px; margin: auto; padding: 20px; border-radius: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.1); }
@@ -10,7 +11,7 @@
   button { width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
   .loader { display: none; border: 5px solid #f3f3f3; border-top: 5px solid #007bff; border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; margin: 20px auto; }
   @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  #resImg { width: 100%; border-radius: 15px; margin-top: 15px; display: none; border: 1px solid #eee; cursor: pointer; }
+  #resImg { width: 100%; border-radius: 15px; margin-top: 15px; display: none; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -21,15 +22,13 @@
   <button onclick="gen()">Create Image</button>
   <div class="loader" id="ldr"></div>
   
-  <img id="resImg" src="" onclick="openToSave()">
-  <p id="msg" style="display:none; color:#888; font-size:14px; margin-top:10px;">
-    Click the image to Open, then Long Press to Save.
+  <img id="resImg" src="" onclick="openDirect()">
+  <p id="msg" style="display:none; color:#d9534f; font-weight:bold; margin-top:10px;">
+    Click the image, then Long Press to Save
   </p>
 </div>
 
 <script>
-var lastUrl = "";
-
 function gen() {
   var p = document.getElementById('pInput').value.trim();
   if(!p) return alert("Enter description");
@@ -38,10 +37,10 @@ function gen() {
   ldr.style.display = "block"; imgTag.style.display = "none"; msg.style.display = "none";
 
   var seed = Math.floor(Math.random() * 1000000);
-  // നേരിട്ടുള്ള ഇമേജ് ലിങ്ക് (ഇത് .bin ആകാൻ സാധ്യത കുറവാണ്)
-  lastUrl = "https://image.pollinations.ai/prompt/" + encodeURIComponent(p) + "?seed=" + seed + "&width=1024&height=1024&nologo=true";
+  // Pollinations നേരിട്ടുള്ള ലിങ്ക്
+  var finalUrl = "https://image.pollinations.ai/prompt/" + encodeURIComponent(p) + "?seed=" + seed + "&width=1024&height=1024&nologo=true";
 
-  imgTag.src = lastUrl;
+  imgTag.src = finalUrl;
   imgTag.onload = function() {
     ldr.style.display = "none";
     imgTag.style.display = "block";
@@ -49,10 +48,10 @@ function gen() {
   };
 }
 
-function openToSave() {
-  // ഇമേജ് മാത്രം ഒരു പുതിയ വിൻഡോയിൽ തുറക്കുന്നു
-  // അപ്പോൾ ഫോണിന് അത് നേരിട്ടുള്ള ഫയലായി ലഭിക്കും
-  window.location.href = lastUrl;
+function openDirect() {
+  // ഇമേജിന്റെ URL നേരിട്ട് ബ്രൗസറിൽ തുറക്കുന്നു
+  var img = document.getElementById('resImg');
+  window.location.href = img.src;
 }
 </script>
 </body>
