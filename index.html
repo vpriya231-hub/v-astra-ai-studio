@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   body { font-family: sans-serif; text-align: center; background: #fff; padding: 10px; margin: 0; }
-  .box { max-width: 450px; margin: auto; padding: 20px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
-  input { width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; }
-  button { width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-bottom: 10px; }
+  .box { max-width: 450px; margin: auto; padding: 20px; border-radius: 20px; box-shadow: 0 5px 25px rgba(0,0,0,0.1); }
+  input { width: 100%; padding: 15px; margin-bottom: 10px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; font-size: 16px; }
+  button { width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 16px; margin-bottom: 10px; }
   #dlBtn { background: #28a745; display: none; }
-  .loader { display: none; border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; margin: 20px auto; }
+  .loader { display: none; border: 5px solid #f3f3f3; border-top: 5px solid #007bff; border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; margin: 20px auto; }
   @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   #resImg { width: 100%; border-radius: 15px; margin-top: 15px; display: none; }
 </style>
@@ -30,13 +30,11 @@
 <script>
 function gen() {
   var p = document.getElementById('pInput').value.trim();
-  if(!p) return alert("Please enter description");
-
+  if(!p) return alert("Enter description");
   var l = document.getElementById('ldr'), i = document.getElementById('resImg'), d = document.getElementById('dlBtn');
   l.style.display = "block"; i.style.display = "none"; d.style.display = "none";
 
   var url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(p) + "?seed=" + Math.random() + "&width=1024&height=1024&nologo=true";
-  
   i.src = url;
   i.onload = function() { 
     l.style.display = "none"; i.style.display = "block"; d.style.display = "block";
@@ -47,27 +45,21 @@ function downloadImg() {
   var img = document.getElementById('resImg');
   var canvas = document.getElementById('canvas');
   var ctx = canvas.getContext('2d');
-  
-  canvas.width = img.naturalWidth;
-  canvas.height = img.naturalHeight;
+  canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
   ctx.drawImage(img, 0, 0);
 
-  // വാട്ടർമാർക്ക്
+  // വാട്ടർമാർക്ക് (V-Astra AI)
   ctx.font = "bold 30px Arial";
   ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
   ctx.textAlign = "right";
   ctx.fillText("V-Astra AI", canvas.width - 20, canvas.height - 30);
 
-  // blob ഉപയോഗിച്ച് ഡൗൺലോഡ് ചെയ്യുന്നത് ഫയൽ എക്സ്റ്റൻഷൻ ശരിയാക്കാൻ സഹായിക്കും
-  canvas.toBlob(function(blob) {
-    var url = URL.createObjectURL(blob);
-    var link = document.createElement('a');
-    link.href = url;
-    link.download = 'V-Astra_AI.png';
-    link.click();
-    URL.revokeObjectURL(url);
-  }, 'image/png');
+  var link = document.createElement('a');
+  link.download = 'V-Astra_AI_Image.png';
+  link.href = canvas.toDataURL("image/png");
+  link.click();
 }
 </script>
 </body>
 </html>
+
